@@ -1,0 +1,3 @@
+import tunet
+
+tunet.logout()

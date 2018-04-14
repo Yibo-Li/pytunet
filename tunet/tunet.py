@@ -1,6 +1,10 @@
 import hashlib
 import requests
 import re
+import base64
+import hmac
+import json
+from .xEncode import xencode
 
 def get_err(res):
     pattern = re.compile("E\d+")
@@ -37,6 +41,12 @@ def get_err(res):
     }
     return switch.get(n, msg)
 
+def force(msg):
+    ret = []
+    for w in msg:
+        ret.append(ord(w))
+    return bytes(ret)
+
 def login(name, pwd):
     if name == "":
         print("请填写用户名")
@@ -46,23 +56,47 @@ def login(name, pwd):
         print("请填写密码")
         return
 
-    ac_id = 1
-    host = "http://net.tsinghua.edu.cn/do_login.php"
-    md5 = hashlib.md5(pwd.encode()).hexdigest()
+    ac_id = "1"
+    host = "https://auth4.tsinghua.edu.cn/cgi-bin/srun_portal"
+    challenge = requests.post("https://auth4.tsinghua.edu.cn/cgi-bin/get_challenge", data = {
+        "callback": "1",
+        "username": name})
+    token = json.loads(challenge.text[2:-1])['challenge']
+    hmd5 = hmac.new(token.encode(), pwd.encode()).hexdigest()
+    enc = "s" + "run" + "_bx1"
+    ip = ""
+    n = "200"
+    type = "1"
+    msg = {"username": name, "password": pwd, "ip": ip, "acid": ac_id, "enc_ver": enc}
+    info = "{SRBX1}" + base64.b64encode(force(xencode(json.dumps(msg, separators=(',',':')), token))).translate(bytes.maketrans(
+        b'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/',
+        b'LVoJPiCN2R8G90yg+hmFHuacZ1OWMnrsSTXkYpUq/3dlbfKwv6xztjI7DeBE45QA')).decode()
 
     try:
         result = requests.post(host, data = {
             "action": "login",
             "username": name,
-            "password": "{MD5_HEX}" + md5,
-            "ac_id": "1"})
+            "password": "{MD5}" + hmd5,
+            "ac_id": ac_id,
+            "type": type,
+            "n": n,
+            "ip": ip,
+            "info": info,
+            "chksum": hashlib.sha1((
+                token + name +
+                token + hmd5 +
+                token + ac_id +
+                token + ip +
+                token + n +
+                token + type +
+                token + info).encode()).hexdigest()})
     except requests.exceptions.RequestException as e:
         print(e)
     else:
         print(get_err(result.text))
 
 def logout():
-    host = "http://net.tsinghua.edu.cn/do_login.php"
+    host = "https://auth4.tsinghua.edu.cn/cgi-bin/srun_portal"
 
     try:
         result = requests.post(host, data = {

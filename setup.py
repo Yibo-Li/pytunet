@@ -16,5 +16,6 @@ setup(
     author_email = 'gansuliyibo@126.com',
     keywords = 'tunet login logout',
     packages = ['tunet'],
+    install_requires = ['requests'],
     license = 'MIT'
 )

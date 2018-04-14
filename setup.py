@@ -8,7 +8,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name = 'tunet',
-    version = '1.0.1',
+    version = '1.0.2',
     description = 'Tsinghua University Network (tunet) login and logout tools',
     long_description = long_description,
     url = 'https://github.com/Yibo-Li/pytunet',

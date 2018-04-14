@@ -57,7 +57,7 @@ def login(name, pwd):
             "password": "{MD5_HEX}" + md5,
             "ac_id": "1"})
     except requests.exceptions.RequestException as e:
-        print(e.errno)
+        print(e)
     else:
         print(get_err(result.text))
 

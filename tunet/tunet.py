@@ -47,19 +47,20 @@ def force(msg):
         ret.append(ord(w))
     return bytes(ret)
 
-def get_challenge(name, callback):
+def get_challenge(name, ip, callback):
     host = "https://auth4.tsinghua.edu.cn/cgi-bin/get_challenge"
 
     try:
         challenge = requests.post(host, data = {
             "callback": "1",
-            "username": name})
+            "username": name,
+            "ip": ip})
     except requests.exceptions.RequestException as e:
         print(e)
     else:
         callback(challenge)
 
-def login(name, pwd):
+def login(name, pwd, ip = ''):
     if name == "":
         print("请填写用户名")
         return
@@ -74,7 +75,6 @@ def login(name, pwd):
         token = json.loads(challenge.text[2:-1])['challenge']
         hmd5 = hmac.new(token.encode(), pwd.encode()).hexdigest()
         enc = "s" + "run" + "_bx1"
-        ip = ""
         n = "200"
         type = "1"
         msg = {"username": name, "password": pwd, "ip": ip, "acid": ac_id, "enc_ver": enc}
@@ -105,14 +105,16 @@ def login(name, pwd):
         else:
             print(get_err(result.text))
 
-    get_challenge(name, _callback)
+    get_challenge(name, ip, _callback)
 
-def logout():
+def logout(name = '', ip = ''):
     host = "https://auth4.tsinghua.edu.cn/cgi-bin/srun_portal"
 
     try:
         result = requests.post(host, data = {
-            "action": "logout"})
+            "action": "logout",
+            "username": name,
+            "user_ip": ip})
     except requests.exceptions.RequestException as e:
         print(e)
     else:

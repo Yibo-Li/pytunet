@@ -1,3 +1,6 @@
 import tunet
 
-tunet.logout()
+options = {
+    'name': 'user_name'
+}
+tunet.logout(options['name'])

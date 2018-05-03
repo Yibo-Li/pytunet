@@ -5,6 +5,9 @@ TUNET is a python tool to login and logout Tsinghua University Network (tunet).
 To use this do as below:
 
 ```python
+# install from pip
+pip install tunet
+
 # import tunet package
 import tunet
 
